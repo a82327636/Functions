@@ -1,0 +1,178 @@
+package com.qftx;
+
+import org.junit.Assert;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * @ProjectName: tsm9
+ * @Package: com.qftx
+ * @ClassName: FunctionTest
+ * @Author: zwj
+ * @Description: 注释
+ * @Date: 2021/2/1 13:58
+ * @Version: 1.0
+ */
+public class FunctionTest {
+
+    public static void main(String[] args)
+    {
+        stream();
+    }
+
+
+
+    public static void function(){
+        Function<Integer,Integer> f = s-> ++s;
+        Function<Integer,Integer> g = s-> s*2;
+
+        System.out.println(f.compose(g).apply(1));
+
+        System.out.println(f.andThen(g).apply(1));
+
+        System.out.println(Function.identity().apply("a"));
+    }
+
+
+    public static void predicate(){
+        Predicate<String> p = o -> o.equals("test");
+        Predicate<String> g = o -> o.startsWith("t");
+
+        System.out.println(p.negate().test("test"));
+        System.out.println(p.test("test"));
+
+        System.out.println(p.and(g).test("test"));
+
+        System.out.println(p.or(g).test("test"));
+
+    }
+
+    public static void consumer(){
+        Consumer f = System.out::println;
+        Consumer f2 = n -> System.out.println(n + "-F2");
+        f.andThen(f2).accept("test");
+        f.andThen(f).andThen(f).andThen(f2).accept("test1");
+    }
+
+
+    public static void stream(){
+       // List<String> list = Arrays.asList("a", "bb", "ac", "bd");
+        List<String> list = new ArrayList<>();
+        list.add(new String("a"));
+        list.add(new String("bb"));
+        list.add(new String("ba"));
+
+//        Stream listStream = list.stream();                   //获取串行的Stream对象
+//        Stream parallelListStream = list.parallelStream();   //获取并行的Stream对象
+
+//        Stream s1 = Stream.of("a", "b", "c", "d");
+//        Stream s = Stream.of("test");
+//        Predicate<String> p = o -> o.equals("a");
+//        Predicate<String> g = o -> o.startsWith("b");
+//        list.stream().filter(g.or(p)).limit(2).forEach(System.out::println);
+//
+//        System.out.println("-------- map 参数为 function------------");
+//
+//        List<String>list1 = Arrays.asList("a,b,c","1,2,3");
+//        Stream<String>s1 = list1.stream().map(s->s.replaceAll(",",""));
+//        s1.forEach(System.out::println);
+//
+//        System.out.println("-------- flatmap 将流中的每个值都换成流------------");
+//
+//        Stream<String>s2 = list1.stream().flatMap(s->{
+//            String[]split = s.split(",");
+//            Stream<String>s3 = Arrays.stream(split);
+//            return s3;
+//        });
+//
+//        s2.forEach(System.out::println);
+
+        System.out.println("-------- sorted 自然排序------------");
+
+        list.stream().sorted().forEach(System.out::println);
+
+        System.out.println("-------- peek------------");
+        /**
+         * 如同于map，能得到流中的每一个元素。但map接收的是一个Function表达式，有返回值；
+         * 而peek接收的是Consumer表达式，没有返回值
+         */
+        list.stream().peek(s -> {
+            String b = s.replaceAll("a","1");
+            System.out.println(b);
+        }).forEach(System.out::println);
+
+        System.out.println("-------- reduce------------");
+
+        List<Integer>list2 = Arrays.asList(1,3,5,7,8,9,12);
+        System.out.println(list2.stream().reduce((x1,x2)->x1+x2).get());
+
+        System.out.println("-------- collect------------");
+        list2.stream().map(o->o+1).collect(Collectors.toList()).forEach(System.out::println);
+        System.out.println(list2.stream().map(o-> o+"1").collect(Collectors.joining(",","(",")")));
+
+        System.out.println("-------- 聚合------------");
+
+        System.out.println(list2.stream().collect(Collectors.counting()));
+        System.out.println(list2.stream().collect(Collectors.summarizingInt(Integer::intValue)));
+
+        System.out.println("-------- 分组------------");
+        Map<Integer, List<Integer>> ageMap = list2.stream().collect(Collectors.groupingBy(Integer::intValue));
+        System.out.println(ageMap);
+        //Map<Integer, Map<Integer, List<Integer>>> typeAgeMap = list2.stream().collect(Collectors.groupingBy(Student::getType, Collectors.groupingBy(Student::getAge)));
+
+
+        //分成两部分，一部分大于10，一部分小于等于10
+        Map<Boolean, List<Integer>> partMap = list2.stream().collect(Collectors.partitioningBy(v -> v > 10));
+        System.out.println(partMap);
+
+        //规约
+        System.out.println(list2.stream().collect(Collectors.reducing(Integer::sum)).get());
+    }
+
+
+    public static void optional(){
+//        Optional<String>optional = Optional.empty();
+//        System.out.println(optional.get());
+
+//        Optional<String>optional1 = Optional.of(null);
+//        System.out.println(optional1.get());
+
+//        Optional<String>optional1 = Optional.ofNullable("!11");
+//        System.out.println(optional1);
+
+//        Optional<String>optional1 = Optional.ofNullable(null);
+//        // 还有一个isPresent ,ifPresent 与  consumer配合
+//        optional1.ifPresent(System.out::println);
+//        System.out.println(optional1);
+
+//        Optional optional = Optional.ofNullable("test");
+//        System.out.println(optional.filter(o -> o.equals("test")));
+
+        System.out.println(Optional.ofNullable(null).filter(o -> o.equals("test1")).orElse("123"));
+
+        System.out.println(Optional.ofNullable(null).map(s->s+"111").orElse("321"));
+
+        List<String>ids = new ArrayList<>();
+        System.out.println(ids.stream().findFirst().orElse("111"));
+        ids.add("000");
+        System.out.println(ids.stream().findFirst().orElse("111"));
+    }
+
+
+    public static void supplier(){
+        Supplier<String>stringSupplier = ()->"test1";
+        System.out.println(stringSupplier.get());
+
+        Supplier<String> sup= (()->{System.out.println("123");return "321";});
+        System.out.println(sup.get());
+        System.out.println(sup.get());
+        System.out.println(sup.get());
+
+    }
+}
